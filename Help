@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Геолокація</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 40px 20px;
+}
+
+button {
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#result {
+    margin-top: 20px;
+    word-break: break-word;
+}
+</style>
+</head>
+<body>
+
+<h1>Перевірка геолокації</h1>
+
+<button id="getLocationBtn">
+    Надати доступ до геолокації
+</button>
+
+<div id="result"></div>
+
+<script>
+const result = document.getElementById("result");
+
+document.getElementById("getLocationBtn").addEventListener("click", () => {
+
+    if (!navigator.geolocation) {
+        result.innerHTML =
+            "<p>Ваш браузер не підтримує геолокацію.</p>";
+        return;
+    }
+
+    result.innerHTML = "<p>Отримання координат...</p>";
+
+    navigator.geolocation.getCurrentPosition(
+        success,
+        error,
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+    );
+});
+
+function success(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    const accuracy = position.coords.accuracy;
+
+    result.innerHTML = `
+        <h3>Геолокацію отримано</h3>
+        <p><strong>Широта:</strong> ${lat}</p>
+        <p><strong>Довгота:</strong> ${lon}</p>
+        <p><strong>Точність:</strong> ${Math.round(accuracy)} м</p>
+        <p>
+            <a href="https://maps.google.com/?q=${lat},${lon}"
+               target="_blank">
+               Відкрити на карті
+            </a>
+        </p>
+    `;
+
+    // Якщо у тебе є власний сервер,
+    // тут можна відправити координати через fetch().
+}
+
+function error(err) {
+    let message = "";
+
+    switch (err.code) {
+        case 1:
+            message = "Користувач відмовив у доступі до геолокації.";
+            break;
+        case 2:
+            message = "Не вдалося визначити місцезнаходження.";
+            break;
+        case 3:
+            message = "Час очікування вичерпано.";
+            break;
+        default:
+            message = err.message;
+    }
+
+    result.innerHTML = `
+        <h3>Помилка</h3>
+        <p>${message}</p>
+        <p>Код: ${err.code}</p>
+    `;
+}
+</script>
+
+</body>
+</html>
